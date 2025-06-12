@@ -1,0 +1,8 @@
+[package]
+name = "game_project"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+sdl3-main = { version = "0.5.4" }
+sdl3-sys = { version = "0.5.2" }
