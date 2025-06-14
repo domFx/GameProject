@@ -10,10 +10,16 @@ members = [
 ]
 
 [workspace.dependencies]
+# Crates
 sdl3 = {  path = "crates/sdl3", version = "0.1.0" }
+
+# Other
+anyhow = "1.0.9"
+log = "0.4.27"
 sdl3-sys = { version = "0.5.2" }
 
 [dependencies]
 sdl3-main = { version = "0.5.4" }
 sdl3-sys.workspace = true 
 sdl3.workspace = true
+log.workspace = true

@@ -1,4 +1,6 @@
 use std::ptr::NonNull;
+use sdl3_sys::events::{SDL_Event, SDL_EventType};
+
 use crate::enums::SDL3RendererType;
 
 // Modules
@@ -80,7 +82,15 @@ impl SDL3Wrapper {
         }
     }
 
+    /// Gets an SDL_Event from a u32
+    pub fn sdl_get_sdl_event(&self, event: &SDL_Event) -> SDL_EventType {
+        unsafe { 
+            sdl3_sys::events::SDL_EventType(event.r#type)
+        }
+    }
+
     /// SDL_Log
+    /// This function logs the SDL error message to the console.
     pub(crate) fn sdl_log(&self) {
         unsafe {
             let sdl_error_msg = std::ffi::CStr::from_ptr(sdl3_sys::everything::SDL_GetError());
