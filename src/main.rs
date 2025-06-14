@@ -1,6 +1,7 @@
-use std::ptr::NonNull;
+use sdl3::enums::SDL3RendererType;
+use sdl3::{SDL3Wrapper, SDL3RendererWrapper, SDL3WindowWrapper};
 
-use sdl3_sys::{events::SDL_Event, render};
+use sdl3_sys::{events::SDL_Event};
 use sdl3_main::{app_impl, AppResult};
 
 struct ApplicationState {
@@ -64,105 +65,5 @@ impl ApplicationState {
         }     
 
         AppResult::Continue
-    }
-}
-
-
-struct SDL3Wrapper { }
-
-struct SDL3WindowWrapper {
-    pub(crate) window_ptr: NonNull<sdl3_sys::video::SDL_Window>
-}
-
-unsafe impl Sync for SDL3WindowWrapper {}
-unsafe impl Send for SDL3WindowWrapper {}
-
-struct SDL3RendererWrapper {
-    pub(crate) renderer_ptr: NonNull<sdl3_sys::everything::SDL_Renderer>
-}
-
-unsafe impl Sync for SDL3RendererWrapper {}
-unsafe impl Send for SDL3RendererWrapper {}
-
-enum SDL3RendererType {
-    OpenGL,
-    Vulkan,
-    Metal,
-    Direct3D,
-}
-
-impl SDL3RendererType {
-    pub fn get_renderer_name(&self) -> &str {
-        match self {
-            SDL3RendererType::OpenGL => "opengl",
-            SDL3RendererType::Vulkan => "vulkan",
-            SDL3RendererType::Metal => "metal",
-            SDL3RendererType::Direct3D => "direct3d",
-        }
-    }
-}
-
-impl SDL3Wrapper {
-    pub fn sdl_init(&self, init_flags: sdl3_sys::init::SDL_InitFlags) -> bool {
-        unsafe {
-            sdl3_sys::init::SDL_Init(init_flags)
-        }
-    }
-
-    pub fn sdl_create_window(&self, title: &str, width: i32, height: i32, window_flags: sdl3_sys::video::SDL_WindowFlags) -> Option<SDL3WindowWrapper> {
-        let title_cstr = std::ffi::CString::new(title).unwrap();
-        unsafe {
-            let window = sdl3_sys::video::SDL_CreateWindow(
-                title_cstr.as_ptr(),
-                width,
-                height,
-                window_flags
-            );
-
-            if window.is_null() {
-                None
-            } else {
-                let window_ptr = NonNull::new_unchecked(window);
-                Some(SDL3WindowWrapper { window_ptr })
-            }
-        }
-    }
-
-    pub fn sdl_create_renderer(&self, window: &mut SDL3WindowWrapper, renderer_type: SDL3RendererType) -> Option<SDL3RendererWrapper> {
-        let title_cstr = std::ffi::CString::new(renderer_type.get_renderer_name()).unwrap();
-        unsafe {
-            let renderer = sdl3_sys::render::SDL_CreateRenderer(
-                window.window_ptr.as_ptr(),
-                title_cstr.as_ptr(),
-            );
-
-            if renderer.is_null() {
-                let sdl_error_msg = std::ffi::CStr::from_ptr(sdl3_sys::everything::SDL_GetError());
-
-                let msg = format!("SDL ERROR: {:?}", sdl_error_msg.to_str());
-                let c_msg = std::ffi::CString::new(msg).unwrap();
-                sdl3_sys::log::SDL_Log(c_msg.as_ptr());
-                None
-            } else {
-                let renderer_ptr = NonNull::new_unchecked(renderer);
-                Some(SDL3RendererWrapper { renderer_ptr })
-            }
-        }
-    }
-
-    pub fn sdl_set_app_metadata(&self, app_name: &str, app_version: &str, app_identifier: &str) {
-        let appname = std::ffi::CString::new(app_name).unwrap();
-        let appversion = std::ffi::CString::new(app_version).unwrap();
-        let appidentifier = std::ffi::CString::new(app_identifier).unwrap();
-
-        unsafe {
-            sdl3_sys::everything::SDL_SetAppMetadata(appname.as_ptr(), appversion.as_ptr(), appidentifier.as_ptr());
-        }
-    }
-
-    pub fn destroy_window(&self, window: SDL3WindowWrapper) {
-        unsafe {
-            sdl3_sys::video::SDL_DestroyWindow(window.window_ptr.as_ptr());
-        }
     }
 }

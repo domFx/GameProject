@@ -6,7 +6,15 @@ version = 4
 name = "game_project"
 version = "0.1.0"
 dependencies = [
+ "sdl3",
  "sdl3-main",
+ "sdl3-sys",
+]
+
+[[package]]
+name = "sdl3"
+version = "0.1.0"
+dependencies = [
  "sdl3-sys",
 ]
 
